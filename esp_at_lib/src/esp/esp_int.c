@@ -1905,6 +1905,7 @@ espi_initiate_cmd(esp_msg_t* msg) {
             AT_PORT_SEND_BEGIN_AT();
             AT_PORT_SEND_CONST_STR("+CIPSERVER=");
             if (msg->msg.tcpip_server.en) {     /* Do we want to enable server? */
+                AT_PORT_SEND_CONST_STR("1");
                 espi_send_port(msg->msg.tcpip_server.port, 0, 1);
             } else {                            /* Disable server */
                 AT_PORT_SEND_CONST_STR("0");
