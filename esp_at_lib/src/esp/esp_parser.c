@@ -250,16 +250,14 @@ espi_parse_cipstatus(const char* str) {
 espr_t
 espi_parse_ciprecvdata(const char* str) {
     size_t len;
-    uint8_t conn;
     if (*str == '+') {
         str += 13;
     }
 
-    /* Check data length */
-    conn = espi_parse_number(&str);             /* Parse connection ID */
-    if (conn < ESP_CFG_MAX_CONNS) {
-        esp.m.ipd.conn = &esp.m.conns[conn];    /* Set connection */
-    } else {
+    // Check connection ID is already set
+    // Old ESP firmware does not send connection id as part of reponse. This
+    // relies on connection set when making the request.
+    if (!esp.m.ipd.conn) {
         return espERR;
     }
     if ((len = espi_parse_number(&str)) > 0) {  /* Get number of bytes to read */

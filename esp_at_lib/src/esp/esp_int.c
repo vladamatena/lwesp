@@ -1174,9 +1174,9 @@ espi_process(const void* data, size_t data_len) {
                      * Check if "+CIPRECVDATA" statement is in array and now we received colon,
                      * indicating end of +CIPRECVDATA statement and start of actual data
                      */
-                    if (ch == ',' && RECV_LEN() > 12 && RECV_IDX(0) == '+' && !strncmp(recv_buff.data, "+CIPRECVDATA", 12)
-                        && (tmp_ptr = strchr(recv_buff.data, ',')) != NULL  /* Search for first comma */
-                        && strchr(tmp_ptr + 1, ',') != NULL) {  /* Search for second comma, the one just received */
+                    if (ch == ':' && RECV_LEN() > 12 && RECV_IDX(0) == '+' && !strncmp(recv_buff.data, "+CIPRECVDATA", 12)
+                        && (tmp_ptr = strchr(recv_buff.data, ',')) != NULL  // Search for first comma 
+                        && strchr(tmp_ptr + 1, ':') != NULL) {  /* Search for second comma, the one just received */
                         espi_parse_received(&recv_buff);    /* Parse received string */
                         if (esp.m.ipd.read) {   /* Shall we start read procedure? */
                             /*
@@ -2056,6 +2056,10 @@ espi_initiate_cmd(esp_msg_t* msg) {
         case ESP_CMD_TCPIP_CIPRECVDATA: {       /* Manually read data */
             AT_PORT_SEND_BEGIN_AT();
             AT_PORT_SEND_CONST_STR("+CIPRECVDATA=");
+            // Store connection. As Old ESP FW does not report connection ID in
+            // repsponse this relies on next reponse will be response to this
+            // command.
+            esp.m.ipd.conn = &esp.m.conns[msg->msg.ciprecvdata.conn->num];
             espi_send_number(ESP_U32(msg->msg.ciprecvdata.conn->num), 0, 0);
             espi_send_number(ESP_U32(msg->msg.ciprecvdata.len), 0, 1);
             AT_PORT_SEND_END_AT();
